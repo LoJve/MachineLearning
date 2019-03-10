@@ -9,7 +9,6 @@
 
 3、Create a directory locally
     Right click on the directory and select 'git Bash here', run the following code in order on the Git Bash.
-
     >>> echo "# vscode-demo" >> README.md
     >>> git init
     >>> git add README.md
