@@ -21,4 +21,7 @@ def test_KNN():
     accuracy = knn_classification.get_accuracy(predicted_data, test_y)
     print(accuracy)
 
+def test():
+    print("test")
+
 test_KNN()
