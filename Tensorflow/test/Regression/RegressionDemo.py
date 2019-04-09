@@ -16,6 +16,7 @@ import os
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import MinMaxScaler
 
 file_path = "./MachineLearning/DataSet/Regression"
 file_name = "auto-mpg.data"
@@ -48,7 +49,7 @@ test_dataset = dataset.drop(train_dataset.index)
 # Inspect the data
 sns.set(style="ticks")
 print(sns.pairplot(train_dataset[['MPG', 'Cylinders', 'Displacement', 'Weight']], diag_kind='kde'))
-plt.show()
+# plt.show()
 
 train_stats = train_dataset.describe()
 train_stats.pop('MPG')
@@ -60,7 +61,10 @@ test_lables = test_dataset.pop('MPG')
 
 # Normalize the data
 def norm(data):
-    return (data - train_stats['mean']) / train_stats['std']
+    scaler = MinMaxScaler()
+    scaler.fit(data)
+    return scaler.transform(data)
+    # return (data - train_stats.mean) / train_stats.std
 norm_train_data = norm(train_dataset)
 norm_test_data = norm(test_dataset)
 
@@ -132,4 +136,25 @@ def plot_history(history):
   plt.show()
 
 
-plot_history(history)
+# plot_history(history)
+
+loss, mae, mse = model.evaluate(norm_test_data, test_lables, verbose=0)
+print('Testing set Mean Abs Error : {:5.2f} MPG'.format(mae))
+
+# Make predictions
+test_predictions = model.predict(norm_test_data).flatten()
+
+plt.scatter(test_lables, test_predictions)
+plt.xlabel('True Values [MPG]')
+plt.ylabel('Predictions [MPG]')
+plt.axis('equal')
+plt.axis('square')
+plt.xlim([0,plt.xlim()[1]])
+plt.ylim([0,plt.ylim()[1]])
+_ = plt.plot([-100, 100], [-100, 100])
+
+error = test_predictions - test_lables
+plt.hist(error, bins = 25)
+plt.xlabel("Prediction Error [MPG]")
+_ = plt.ylabel("Count")
+plt.show()
