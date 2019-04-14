@@ -24,20 +24,37 @@ test_labels = test_labels[:1000]
 train_data = train_data[:1000].reshape(-1, 28 * 28) / 255.0
 test_data = test_data[:1000].reshape(-1, 28 * 28) / 255.0
 
+
 def create_model():
     model = keras.Sequential([
-        keras.layers.Dense(512, activation=tf.nn.relu, input_shape=(784,)),
+        keras.layers.Dense(512, activation=tf.nn.relu, input_shape=(784, )),
         keras.layers.Dropout(0.2),
         keras.layers.Dense(10, activation=tf.nn.softmax)
     ])
 
     model.compile(
         optimizer=keras.optimizers.Adam(),
-        loss = keras.losses.sparse_categorical_crossentropy,
-        metircs=['accuracy']
-    )
+        loss=keras.losses.sparse_categorical_crossentropy,
+        metrics=['accuracy'])
     return model
 
+
+# 检查点回调用法
+checkpoint_path = "./MachineLearning/Tensorflow/test/save/training_1/cp.ckpt"
+checkpoint_dir = os.path.dirname(checkpoint_path)
+cp_callback = keras.callbacks.ModelCheckpoint(checkpoint_path, save_weights_only=True, verbose=True)
+
 model = create_model()
+
+model.fit(train_data, train_labels, epochs=10, validation_data=(test_data, test_labels), callbacks=[cp_callback])
+
+#测试
+model_test = create_model()
+loss, acc = model_test.predict(test_data, test_labels)
+print('Untrained model, accuracy : {:5.2f}%'.format(100*acc))
+
+model_test.load_weights(checkpoint_path)
+loss, acc = model_test.predict(test_data, test_labels)
+print('Untrained model, accuracy : {:5.2f}%'.format(100*acc))
 
 
