@@ -50,11 +50,26 @@ model.fit(train_data, train_labels, epochs=10, validation_data=(test_data, test_
 
 #测试
 model_test = create_model()
-loss, acc = model_test.predict(test_data, test_labels)
+loss, acc = model_test.evaluate(test_data, test_labels)
 print('Untrained model, accuracy : {:5.2f}%'.format(100*acc))
 
 model_test.load_weights(checkpoint_path)
-loss, acc = model_test.predict(test_data, test_labels)
+loss, acc = model_test.evaluate(test_data, test_labels)
 print('Untrained model, accuracy : {:5.2f}%'.format(100*acc))
 
+# 检查点回调选项
+checkpoint_path = "./MachineLearning/Tensorflow/test/save/training_2/cp-{epoch:04d}.ckpt"
+checkpoint_dir = os.path.dirname(checkpoint_path)
+cp_callback = keras.callbacks.ModelCheckpoint(checkpoint_path, save_weights_only=True, verbose=1, period=5)
+
+model = create_model()
+model.fit(train_data, train_labels, epochs=50, callbacks=[cp_callback], validation_data=(test_data, test_labels), verbose=0)
+latest = tf.train.latest_checkpoint(checkpoint_dir)
+print(latest)
+
+# 测试
+model = create_model()
+model.load_weights(latest)
+loss, acc = model.evaluate(test_data, test_labels)
+print("Restored model, accuracy: {:5.2f}%".format(100*acc))
 
